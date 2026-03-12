@@ -54,6 +54,10 @@ export class Blockchain {
         this.utxos  = await this.store.getAllUTXOs();
         console.log(`[AXON] Loaded chain from disk: height ${this.state.height}, best: ${this.state.bestBlockHash.substring(0, 16)}...`);
         console.log(`[AXON] Restored ${this.utxos.size} UTXOs from disk`);
+        // Rebuild heightIndex from persisted blocks
+        await this.rebuildHeightIndex();
+        // Genesis is never persisted to LevelDB — always rebuild it in memory
+        this.initGenesis();
         return;
       }
     }
@@ -149,6 +153,20 @@ export class Blockchain {
 
   getBlock(hash: string): Block | undefined {
     return this.blocks.get(hash);
+  }
+
+  private async rebuildHeightIndex(): Promise<void> {
+    if (!this.store) return;
+    let rebuilt = 0;
+    for (let h = 0; h <= this.state.height; h++) {
+      const block = await this.store.getBlockAtHeight(h);
+      if (block) {
+        this.heightIndex.set(h, block.hash);
+        this.blocks.set(block.hash, block);
+        rebuilt++;
+      }
+    }
+    console.log(`[AXON] Rebuilt height index: ${rebuilt} blocks loaded`);
   }
 
   getBlockAtHeight(height: number): Block | undefined {

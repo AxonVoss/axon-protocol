@@ -21,7 +21,8 @@ import { MempoolStore }          from './blockchain/mempool';
 const RPC_HOST    = process.env.RPC_HOST    || '127.0.0.1';
 const RPC_PORT    = parseInt(process.env.RPC_PORT || '8332');
 const P2P_PORT    = parseInt(process.env.P2P_PORT || '8333');
-const MINER_SEED  = process.env.MINER_SEED  || 'axon-default-miner';
+const MINER_SEED    = process.env.MINER_SEED    || 'axon-default-miner';
+const MINER_ADDRESS = process.env.MINER_ADDRESS || '';
 const PEERS       = (process.env.PEERS || '').split(',').filter(Boolean);
 const TESTNET     = process.env.NETWORK !== 'mainnet';
 const CHAIN_DIR   = process.env.CHAIN_DIR   || undefined;
@@ -67,7 +68,11 @@ function getTopTxs(maxBytes = 1_000_000): Transaction[] {
 
 async function main() {
   const chain  = await openChain(TESTNET, CHAIN_DIR);
-  const wallet = keypairFromSeed(MINER_SEED);
+  // If MINER_ADDRESS is set, use it directly (cold wallet — no private key on server)
+  // Otherwise derive address from MINER_SEED (hot wallet)
+  const wallet = MINER_ADDRESS
+    ? { address: MINER_ADDRESS, publicKey: '', privateKey: '' }
+    : keypairFromSeed(MINER_SEED);
   let   mining = false;
 
   // Init persistent mempool (same dir as chain data)
