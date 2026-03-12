@@ -48,10 +48,13 @@ export const RPC_PORT = 8332;
 // Testnet checkpoints — added 2026-03-12 after first persistent node run
 // These prevent reorganizing away from the established testnet chain.
 // Add mainnet checkpoints here after launch.
+// Mainnet checkpoints — locked in at block 100 (2026-03-12)
 export const CHECKPOINTS: Array<[number, string]> = [
-  [15, '00ce542d82052af073162b5fa8c75cb34d89ea0696cdb4dad978ce0e6b6825a9'],
-  [20, '00e45a1e8f747bb63fac00fe620c22bcaff54126d3152bb026747dd93595f383'],
-  [24, '00b8ca51cc3208e8353de25a82ef794e2b37b8529545b193e264275f3ef04ccb'],
+  [10,  'f10ff16203aeac04d0f275db9e3155c04f5aa9969a19cf541ab3ecce581fb69d'],
+  [25,  '632866824cad84db97b152da1aa753b4c04ec4da357a7bf5072d55cdbd7c6f78'],
+  [50,  '8d9320975d82d278a5f0f9af118fb183bb6e228fc1eb16c845a58d92bc72a56d'],
+  [75,  '623cd52038adaa57ab7750c912e2dbb4701865c75c32c4a53ee4f7c318165f87'],
+  [100, 'c13ea67d571539952b7b421068af9255f80697a165fca074a36fdef0bdd84f83'],
 ];
 
 // DNS seed hostnames — these resolve to IPs of stable seed nodes.
