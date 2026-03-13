@@ -16,6 +16,7 @@ import { Transaction }           from './blockchain/types';
 import { P2PServer }             from './p2p/server';
 import { MempoolStore }          from './blockchain/mempool';
 import { walletRouter }          from './wallet/api';
+import { multiSigRouter }        from './wallet/multisig-api';
 import { swapRouter, initSwapStore } from './swap/router';
 import { SwapStore }             from './swap/store';
 
@@ -190,6 +191,9 @@ async function main() {
 
   // Wallet API — /wallet/*
   app.use('/wallet', walletRouter());
+
+  // Multi-sig API — /multisig/*
+  app.use('/multisig', multiSigRouter());
 
   // Swap API — /swap/*
   app.use('/swap', swapRouter());
