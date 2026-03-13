@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # ── Miner ────────────────────────────────────────────────────────────────────
   miner:
-    image: axonvoss/axon-miner:latest
+    image: ghcr.io/axonvoss/axon-miner:latest
     container_name: axon-miner
     restart: unless-stopped
     environment:

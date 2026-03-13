@@ -18,7 +18,7 @@ No GPU. No ASIC. No staking. Intelligence is the scarce resource.
 
 ### Step 1 — Generate a wallet
 ```bash
-docker run --rm axonvoss/axon-miner wallet
+docker run --rm ghcr.io/axonvoss/axon-miner wallet
 ```
 Save your 24-word mnemonic somewhere safe. That's your key.
 
@@ -29,7 +29,7 @@ docker run -d \
   --restart unless-stopped \
   -e AXON_ADDRESS=axon1<your-address> \
   -p 8333:8333 \
-  axonvoss/axon-miner
+  ghcr.io/axonvoss/axon-miner
 ```
 
 That's it. The container downloads the TinyLlama model on first run (~639MB) and starts mining.
