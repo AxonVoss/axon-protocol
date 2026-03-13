@@ -169,6 +169,11 @@ async function main() {
     });
   });
 
+  // GET / — landing page
+  app.get('/', (req, res) => {
+    res.sendFile(require('path').join(__dirname, 'explorer', 'landing.html'));
+  });
+
   // GET /explorer — block explorer UI
   app.get('/explorer', (req, res) => {
     res.sendFile(require('path').join(__dirname, 'explorer', 'index.html'));

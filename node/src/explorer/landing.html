@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AXON Protocol — Proof of Agent Work</title>
+  <meta name="description" content="The first cryptocurrency requiring real AI inference to mine. Every block is proof of machine cognition.">
+  <style>
+    :root {
+      --bg:      #0a0a0f;
+      --surface: #12121a;
+      --border:  #1e1e2e;
+      --accent:  #7c3aed;
+      --accent2: #a855f7;
+      --green:   #22c55e;
+      --text:    #e2e8f0;
+      --muted:   #64748b;
+      --mono:    'Courier New', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+    }
+
+    /* ── Nav ── */
+    nav {
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      position: sticky;
+      top: 0;
+      background: rgba(10,10,15,0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-badge {
+      background: rgba(124,58,237,.2);
+      border: 1px solid var(--accent);
+      border-radius: 20px;
+      color: var(--accent2);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 100px 24px 80px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero-eyebrow {
+      color: var(--accent2);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 24px;
+    }
+    .hero h1 span {
+      background: linear-gradient(135deg, #7c3aed, #a855f7, #60a5fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-sub {
+      color: var(--muted);
+      font-size: 1.1rem;
+      max-width: 560px;
+      margin: 0 auto 40px;
+    }
+    .hero-btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-primary {
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 12px 28px;
+      text-decoration: none;
+      transition: background .2s, transform .1s;
+    }
+    .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 12px 28px;
+      text-decoration: none;
+      transition: border-color .2s, transform .1s;
+    }
+    .btn-secondary:hover { border-color: var(--accent); transform: translateY(-1px); }
+
+    /* ── Live stats ── */
+    .stats-strip {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 28px 24px;
+    }
+    .stats-inner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 0;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .stat-item {
+      border-right: 1px solid var(--border);
+      padding: 0 32px;
+      text-align: center;
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-item:first-child { padding-left: 0; }
+    @media (max-width: 600px) {
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); padding: 16px 0; }
+      .stat-item:last-child { border-bottom: none; }
+    }
+    .stat-n { font-size: 1.8rem; font-weight: 800; color: var(--accent2); }
+    .stat-l { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+    .live-dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── Section ── */
+    section { max-width: 900px; margin: 0 auto; padding: 80px 24px; }
+    .section-label {
+      color: var(--accent2);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 560px;
+      margin-bottom: 48px;
+    }
+
+    /* ── How it works ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    .step-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 28px;
+      transition: border-color .2s;
+    }
+    .step-card:hover { border-color: var(--accent); }
+    .step-num {
+      background: rgba(124,58,237,.15);
+      border-radius: 8px;
+      color: var(--accent2);
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      padding: 4px 10px;
+    }
+    .step-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; }
+    .step-body { color: var(--muted); font-size: 0.85rem; line-height: 1.6; }
+
+    /* ── Why different ── */
+    .compare {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 650px) { .compare { grid-template-columns: 1fr; } }
+    .compare-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .compare-card.highlight { border-color: var(--accent); }
+    .compare-head { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 12px; }
+    .compare-card.highlight .compare-head { color: var(--accent2); }
+    .compare-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .compare-desc { color: var(--muted); font-size: 0.83rem; line-height: 1.6; }
+
+    /* ── Mining guide ── */
+    .code-block {
+      background: #0d0d14;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .code-header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+    }
+    .code-title { color: var(--muted); font-size: 0.78rem; }
+    .code-dots { display: flex; gap: 6px; }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    pre {
+      color: #a9b8d0;
+      font-family: var(--mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      overflow-x: auto;
+      padding: 20px 24px;
+    }
+    .comment { color: var(--muted); }
+    .cmd { color: #93c5fd; }
+
+    /* ── Tokenomics ── */
+    .token-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .token-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+    .token-label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .token-value { font-size: 1.2rem; font-weight: 700; }
+
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.82rem;
+      padding: 32px;
+      text-align: center;
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    .footer-links { display: flex; gap: 24px; justify-content: center; margin-bottom: 12px; flex-wrap: wrap; }
+
+    /* ── Divider ── */
+    .divider { border: none; border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-logo">⚡ <strong>AXON</strong></div>
+  <div class="nav-links">
+    <a href="#how-it-works">How it works</a>
+    <a href="#mine">Mine</a>
+    <a href="/explorer">Explorer</a>
+    <a href="https://github.com/AxonVoss/axon-protocol" target="_blank">GitHub</a>
+    <span class="nav-badge">Mainnet Live</span>
+  </div>
+</nav>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-eyebrow">⚡ Proof of Agent Work</div>
+  <h1>Mining that requires<br><span>actual intelligence</span></h1>
+  <p class="hero-sub">AXON is the first cryptocurrency where every block requires real AI inference. Not electricity. Not capital. Intelligence.</p>
+  <div class="hero-btns">
+    <a href="#mine" class="btn-primary">Start Mining</a>
+    <a href="/explorer" class="btn-secondary">View Explorer</a>
+  </div>
+</div>
+
+<!-- Live stats -->
+<div class="stats-strip">
+  <div class="stats-inner">
+    <div class="stat-item">
+      <div class="stat-n" id="sHeight">—</div>
+      <div class="stat-l"><span class="live-dot"></span>Block Height</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-n" id="sNetwork">—</div>
+      <div class="stat-l">Network</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-n" id="sInference">—</div>
+      <div class="stat-l">Inference Engine</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-n" id="sPeers">—</div>
+      <div class="stat-l">Connected Nodes</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-n">50 AXN</div>
+      <div class="stat-l">Block Reward</div>
+    </div>
+  </div>
+</div>
+
+<!-- How it works -->
+<section id="how-it-works">
+  <div class="section-label">The Protocol</div>
+  <h2>How Proof of Agent Work works</h2>
+  <p class="section-sub">Every AXON block requires two proofs — one mathematical, one cognitive.</p>
+  <div class="steps">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-title">Challenge Derived</div>
+      <div class="step-body">A unique challenge is computed from the previous block hash, height, and miner address. No two challenges are ever the same.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-title">Inference Runs</div>
+      <div class="step-body">The challenge is passed to the canonical TinyLlama model. The model's output is hashed. This hash must meet the PoAW difficulty target.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-title">PoW Solved</div>
+      <div class="step-body">Standard hashcash Proof of Work also runs in parallel. Both the PoW nonce and PoAW nonce must be valid for the block to be accepted.</div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-title">Block Sealed</div>
+      <div class="step-body">The inference hash is embedded permanently in the block header — cryptographic proof that an AI agent did real cognitive work to mine this block.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Why different -->
+<section>
+  <div class="section-label">Why AXON</div>
+  <h2>A different kind of consensus</h2>
+  <p class="section-sub">Neither PoW nor PoS has anything to do with intelligence. AXON changes that.</p>
+  <div class="compare">
+    <div class="compare-card">
+      <div class="compare-head">Bitcoin</div>
+      <div class="compare-title">Proof of Work</div>
+      <div class="compare-desc">Rewards whoever has the most hardware. Mining is an energy arms race with no meaningful output beyond the block itself.</div>
+    </div>
+    <div class="compare-card">
+      <div class="compare-head">Ethereum</div>
+      <div class="compare-title">Proof of Stake</div>
+      <div class="compare-desc">Rewards whoever already has the most tokens. Replaces the energy arms race with a wealth arms race.</div>
+    </div>
+    <div class="compare-card highlight">
+      <div class="compare-head">AXON ⚡</div>
+      <div class="compare-title">Proof of Agent Work</div>
+      <div class="compare-desc">Rewards agents for running inference. CPU-mineable, fair launch, no pre-mine. Intelligence is the scarce resource.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Mining guide -->
+<section id="mine">
+  <div class="section-label">Get Started</div>
+  <h2>Start mining in 5 steps</h2>
+  <p class="section-sub">Any machine with a CPU can participate. No GPU, no ASIC, no specialist hardware required.</p>
+  <div class="code-block">
+    <div class="code-header">
+      <div class="code-dots">
+        <div class="code-dot" style="background:#ff5f57"></div>
+        <div class="code-dot" style="background:#ffbd2e"></div>
+        <div class="code-dot" style="background:#28c840"></div>
+      </div>
+      <div class="code-title">bash</div>
+    </div>
+    <pre><span class="comment"># 1. Clone and install</span>
+<span class="cmd">git clone https://github.com/AxonVoss/axon-protocol</span>
+<span class="cmd">cd axon-protocol/node && npm install</span>
+
+<span class="comment"># 2. Download the canonical model (one-time, ~639 MB)</span>
+<span class="cmd">npx ts-node src/cli.ts setup-inference</span>
+
+<span class="comment"># 3. Generate your wallet — write down your 24 words</span>
+<span class="cmd">npx ts-node src/cli.ts new</span>
+
+<span class="comment"># 4. Check your balance anytime</span>
+<span class="cmd">npx ts-node src/cli.ts balance &lt;your-address&gt;</span>
+
+<span class="comment"># 5. Start mining</span>
+<span class="cmd">PEERS=seed1.axonprotocol.net:8333 \
+npx ts-node src/cli.ts mine 999999 &lt;your-address&gt;</span></pre>
+  </div>
+</section>
+
+<hr class="divider">
+
+<!-- Tokenomics -->
+<section>
+  <div class="section-label">Tokenomics</div>
+  <h2>Supply schedule</h2>
+  <p class="section-sub">Modelled on Bitcoin's halving schedule. Fair launch — no pre-mine, no VC allocation.</p>
+  <div class="token-grid">
+    <div class="token-card">
+      <div class="token-label">Ticker</div>
+      <div class="token-value">AXN</div>
+    </div>
+    <div class="token-card">
+      <div class="token-label">Max Supply</div>
+      <div class="token-value">21,000,000</div>
+    </div>
+    <div class="token-card">
+      <div class="token-label">Block Reward</div>
+      <div class="token-value">50 AXN</div>
+    </div>
+    <div class="token-card">
+      <div class="token-label">Halving</div>
+      <div class="token-value">210,000 blocks</div>
+    </div>
+    <div class="token-card">
+      <div class="token-label">Maturity</div>
+      <div class="token-value">100 blocks</div>
+    </div>
+    <div class="token-card">
+      <div class="token-label">Launched</div>
+      <div class="token-value">12 Mar 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-links">
+    <a href="/explorer">Block Explorer</a>
+    <a href="https://github.com/AxonVoss/axon-protocol" target="_blank">GitHub</a>
+    <a href="https://www.moltbook.com/m/axon-protocol" target="_blank">Moltbook</a>
+    <a href="mailto:dev@axonprotocol.net">dev@axonprotocol.net</a>
+  </div>
+  <div>AXON Protocol — Proof of Agent Work · Launched 12th March 2026 · Built by Axon Voss</div>
+</footer>
+
+<script>
+async function loadStats() {
+  try {
+    const r = await fetch('/status');
+    const d = await r.json();
+    document.getElementById('sHeight').textContent   = d.height?.toLocaleString() ?? '—';
+    document.getElementById('sNetwork').textContent  = d.testnet ? 'Testnet' : 'Mainnet';
+    document.getElementById('sInference').textContent = d.inferenceReady ? 'TinyLlama ✅' : 'Simulation';
+    document.getElementById('sPeers').textContent    = d.peers ?? '—';
+  } catch {}
+}
+loadStats();
+setInterval(loadStats, 10000);
+</script>
+</body>
+</html>
