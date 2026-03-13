@@ -15,6 +15,9 @@ import { getBlockReward, hashTx, addressToScript } from './blockchain/block';
 import { Transaction }           from './blockchain/types';
 import { P2PServer }             from './p2p/server';
 import { MempoolStore }          from './blockchain/mempool';
+import { walletRouter }          from './wallet/api';
+import { swapRouter, initSwapStore } from './swap/router';
+import { SwapStore }             from './swap/store';
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 
@@ -78,6 +81,11 @@ async function main() {
   // Init persistent mempool (same dir as chain data)
   mempool = new MempoolStore(CHAIN_DIR, !!CHAIN_DIR);
   await mempool.open();
+
+  // Init swap store
+  const swapStore = new SwapStore(CHAIN_DIR, !!CHAIN_DIR);
+  await swapStore.open();
+  initSwapStore(swapStore);
 
   // Evict stale txs on startup (older than 72h)
   const evicted = await mempool.evictStale();
@@ -173,6 +181,18 @@ async function main() {
   app.get('/', (req, res) => {
     res.sendFile(require('path').join(__dirname, 'explorer', 'landing.html'));
   });
+
+  // GET /wallet.md — agent skill file
+  app.get('/wallet.md', (req, res) => {
+    res.setHeader('Content-Type', 'text/markdown');
+    res.sendFile(require('path').join(__dirname, 'explorer', 'wallet.md'));
+  });
+
+  // Wallet API — /wallet/*
+  app.use('/wallet', walletRouter());
+
+  // Swap API — /swap/*
+  app.use('/swap', swapRouter());
 
   // GET /explorer — block explorer UI
   app.get('/explorer', (req, res) => {
