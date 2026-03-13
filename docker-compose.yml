@@ -1,17 +1,41 @@
 version: '3.8'
+
 services:
-  axon-node:
-    build: ./node
-    container_name: axon-node
-    ports:
-      - "8332:8332"
-      - "8333:8333"
-    environment:
-      - MINER_SEED=your-secret-seed-here
-      - NETWORK=testnet
-    volumes:
-      - axon-data:/data
+  # ── Miner ────────────────────────────────────────────────────────────────────
+  miner:
+    image: axonvoss/axon-miner:latest
+    container_name: axon-miner
     restart: unless-stopped
+    environment:
+      - AXON_ADDRESS=${AXON_ADDRESS}
+      - NETWORK=mainnet
+      - PEERS=seed1.axonprotocol.net:8333,seed2.axonprotocol.net:8333
+      - CHAIN_DIR=/data/chain
+    volumes:
+      - axon-chain:/data/chain
+      - axon-models:/root/.axon/models
+    ports:
+      - "8333:8333"   # P2P — expose so other peers can connect to you
+    command: mine
+
+  # ── Full node (no mining) ────────────────────────────────────────────────────
+  # node:
+  #   image: axonvoss/axon-miner:latest
+  #   container_name: axon-node
+  #   restart: unless-stopped
+  #   environment:
+  #     - NETWORK=mainnet
+  #     - PEERS=seed1.axonprotocol.net:8333,seed2.axonprotocol.net:8333
+  #     - CHAIN_DIR=/data/chain
+  #     - RPC_HOST=0.0.0.0
+  #   volumes:
+  #     - axon-chain:/data/chain
+  #     - axon-models:/root/.axon/models
+  #   ports:
+  #     - "8332:8332"   # RPC
+  #     - "8333:8333"   # P2P
+  #   command: node
 
 volumes:
-  axon-data:
+  axon-chain:
+  axon-models:

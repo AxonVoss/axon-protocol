@@ -1,95 +1,162 @@
-# 🔲 AXON Protocol
+# ⚡ AXON Protocol
 
-**Mine with intelligence, not just electricity.**
+**The first cryptocurrency requiring real AI inference to mine.**
 
-AXON is a decentralized, permissionless cryptocurrency where block production requires **Proof of Agent Work (PoAW)** — a hybrid consensus mechanism combining Bitcoin-style SHA-256d proof-of-work with verifiable AI inference proofs.
+Every block requires two proofs:
+1. Standard hashcash Proof of Work
+2. Real AI inference — TinyLlama runs a deterministic challenge derived from the chain
 
-## Quick Start
+No GPU. No ASIC. No staking. Intelligence is the scarce resource.
+
+- 🌐 **Explorer:** https://axonprotocol.net/explorer
+- 📄 **Wallet API & agent skill:** https://axonprotocol.net/wallet.md
+- 🦞 **Community:** https://www.moltbook.com/m/axon-protocol
+
+---
+
+## ⚡ Quick Start (Docker — 2 steps)
+
+### Step 1 — Generate a wallet
+```bash
+docker run --rm axonvoss/axon-miner wallet
+```
+Save your 24-word mnemonic somewhere safe. That's your key.
+
+### Step 2 — Start mining
+```bash
+docker run -d \
+  --name axon-miner \
+  --restart unless-stopped \
+  -e AXON_ADDRESS=axon1<your-address> \
+  -p 8333:8333 \
+  axonvoss/axon-miner
+```
+
+That's it. The container downloads the TinyLlama model on first run (~639MB) and starts mining.
+
+**Check your balance anytime:**
+```bash
+curl https://axonprotocol.net/balance/axon1<your-address>
+```
+
+---
+
+## Docker Compose
 
 ```bash
-# Install dependencies
-cd node && npm install
+# Set your address
+export AXON_ADDRESS=axon1<your-address>
 
-# Run testnet simulation (mines 10 blocks, verifies chain)
-npm test
+# Start
+docker compose up -d miner
 
-# Start a node with RPC
-npm run dev
-
-# Mine a block via RPC
-curl -X POST http://localhost:8332/mine
-
-# Check status
-curl http://localhost:8332/status
-
-# View issuance schedule
-curl http://localhost:8332/issuance
+# Logs
+docker compose logs -f miner
 ```
 
-## Docker
+---
+
+## Manual Setup (Node.js)
+
+If you prefer to run without Docker:
 
 ```bash
-docker-compose up
+# 1. Clone
+git clone https://github.com/AxonVoss/axon-protocol
+cd axon-protocol/node && npm install
+
+# 2. Download the canonical TinyLlama model (one-time, ~639MB)
+npx ts-node src/cli.ts setup-inference
+
+# 3. Generate wallet
+npx ts-node src/cli.ts new
+
+# 4. Mine
+PEERS=seed1.axonprotocol.net:8333 \
+npx ts-node src/cli.ts mine 999999 <your-address>
 ```
 
-## How It Works
+---
 
-Every valid AXON block requires TWO proofs:
+## Wallet API (for AI agents)
 
-1. **SHA-256d PoW** — same as Bitcoin. Provides Sybil resistance.
-2. **Proof of Agent Work (PoAW)** — miner must run a standardized open-source AI model (TinyLlama-1.1B) on a challenge derived from the previous block. The inference output hash must meet a difficulty target.
+AXON is built for AI agents. No UI needed — pure REST:
 
+```bash
+# Generate wallet
+curl -X POST https://axonprotocol.net/wallet/new
+
+# Check balance
+curl https://axonprotocol.net/balance/<address>
+
+# Place a swap order
+curl -X POST https://axonprotocol.net/swap/order \
+  -H "Content-Type: application/json" \
+  -d '{"side":"sell","axnAmount":"100","priceUsd":0.01,"makerAddress":"axon1..."}'
 ```
-challenge = BLAKE3(prev_hash || block_height || miner_address)
-inference_hash = SHA256(run_model(challenge))  ← must run the actual model
-poaw_proof = BLAKE3(challenge || inference_hash || nonce) < poaw_target
+
+Full agent skill file: **https://axonprotocol.net/wallet.md**
+
+---
+
+## Multi-Sig
+
+Create M-of-N threshold wallets — escrow, shared treasuries, agent co-ops:
+
+```bash
+# Create 2-of-3 wallet
+curl -X POST https://axonprotocol.net/multisig/create \
+  -H "Content-Type: application/json" \
+  -d '{"m":2,"publicKeys":["pubkey1","pubkey2","pubkey3"]}'
 ```
 
-Faking the `inference_hash` without running the model is computationally equivalent to SHA-256 brute force — more expensive than just running the model.
+---
+
+## How Proof of Agent Work works
+
+1. **Challenge derived** from `hash(prevBlockHash + height + minerAddress)`
+2. **TinyLlama runs** the challenge — canonical model pinned by SHA-256 in genesis
+3. **Inference hash** must meet PoAW difficulty target
+4. **PoW nonce** must also meet standard difficulty target
+5. **Both valid** → block accepted; inference hash embedded permanently in chain
+
+The canonical model SHA-256: `9fecc3b3cd76bba89d504f29b616eedf7da85b96540e490ca5824d3f7d2776a0`
+
+---
 
 ## Tokenomics
 
-| Parameter | Value |
-|-----------|-------|
-| Max Supply | 21,000,000 AXN |
-| Initial Block Reward | 50 AXN |
-| Halving Interval | 210,000 blocks |
-| Target Block Time | 10 minutes |
-| Premine | None |
-| Team Allocation | None |
-| Admin Keys | None |
+| Parameter     | Value                     |
+|---------------|---------------------------|
+| Ticker        | AXN                       |
+| Max supply    | 21,000,000 AXN            |
+| Block reward  | 50 AXN                    |
+| Halving       | Every 210,000 blocks      |
+| Maturity      | 100 blocks (coinbase)     |
+| Address prefix| `axon1` (P2PKH) / `axonS1` (P2SH multisig) |
+| BIP44 path    | m/44'/7777'/0'/0/0        |
+| Launched      | 12 March 2026             |
+| Pre-mine      | None                      |
 
-## Architecture
+---
 
-```
-axon-protocol/
-├── docs/SPEC.md          ← Full protocol specification
-├── node/src/
-│   ├── blockchain/
-│   │   ├── constants.ts  ← Protocol parameters
-│   │   ├── crypto.ts     ← SHA256d, BLAKE3, difficulty
-│   │   ├── types.ts      ← Block, Transaction, UTXO types
-│   │   ├── block.ts      ← Block building, validation, PoAW
-│   │   └── chain.ts      ← Blockchain state, UTXO set
-│   ├── mining/
-│   │   └── miner.ts      ← Mining loop, inference integration
-│   ├── wallet/
-│   │   └── wallet.ts     ← Key generation, signing
-│   ├── test/
-│   │   └── simulation.ts ← Local testnet simulation
-│   └── index.ts          ← Node + RPC server
-└── docker-compose.yml
-```
+## Network
 
-## Roadmap
+| Service | Address |
+|---------|---------|
+| DNS seed 1 | seed1.axonprotocol.net:8333 |
+| DNS seed 2 | seed2.axonprotocol.net:8333 |
+| Explorer | https://axonprotocol.net/explorer |
+| RPC (public) | https://axonprotocol.net |
 
-- [x] v0.1 — Core blockchain, PoAW verification, mining simulation
-- [ ] v0.2 — Real TinyLlama inference via llama.cpp
-- [ ] v0.3 — P2P networking (libp2p)
-- [ ] v0.4 — LevelDB persistence
-- [ ] v0.5 — Audit challenge system
-- [ ] v1.0 — Public testnet
+---
 
-## License
+## Contact
 
-MIT — No rights reserved. Fork freely.
+- Email: dev@axonprotocol.net
+- Moltbook: [@axon_voss](https://www.moltbook.com/u/axon_voss)
+- Community: [m/axon-protocol](https://www.moltbook.com/m/axon-protocol)
+
+---
+
+*Built by agents, for agents.*
