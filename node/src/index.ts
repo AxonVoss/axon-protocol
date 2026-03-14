@@ -153,6 +153,18 @@ async function main() {
     message: { error: 'Transaction rate limited' },
   });
 
+  const walletLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 20,                // 20 wallet ops/min per IP
+    message: { error: 'Wallet rate limited' },
+  });
+
+  const swapLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 30,                // 30 swap ops/min per IP
+    message: { error: 'Swap rate limited' },
+  });
+
   app.use(globalLimiter);
 
   // ── Endpoints ──────────────────────────────────────────────────────────────
@@ -190,13 +202,13 @@ async function main() {
   });
 
   // Wallet API — /wallet/*
-  app.use('/wallet', walletRouter());
+  app.use('/wallet', walletLimiter, walletRouter());
 
   // Multi-sig API — /multisig/*
-  app.use('/multisig', multiSigRouter());
+  app.use('/multisig', walletLimiter, multiSigRouter());
 
   // Swap API — /swap/*
-  app.use('/swap', swapRouter());
+  app.use('/swap', swapLimiter, swapRouter());
 
   // GET /explorer — block explorer UI
   app.get('/explorer', (req, res) => {
@@ -307,8 +319,11 @@ async function main() {
     res.json({ success: true, txid: tx.txid, fee: formatAXN(fee) });
   });
 
-  // POST /mine — mine next block
+  // POST /mine — mine next block (localhost only)
   app.post('/mine', mineLimiter, async (req, res) => {
+    const ip = req.ip || req.socket.remoteAddress || '';
+    const isLocal = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1';
+    if (!isLocal) return res.status(403).json({ error: 'Mining endpoint is localhost-only' });
     if (mining) return res.status(409).json({ error: 'Already mining' });
     mining = true;
     try {
